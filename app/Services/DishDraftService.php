@@ -74,17 +74,7 @@ class DishDraftService
 
     public function normalizeName(string $name): string
     {
-        $firstMacro = $this->resolveFirstMacro($name);
-
-        if ($firstMacro === null) {
-            $cleanName = $name;
-        } else {
-            $position = mb_stripos($name, $firstMacro);
-            $before = mb_substr($name, 0, $position);
-            $after = mb_substr($name, $position + mb_strlen($firstMacro));
-            $cleanName = $before.' '.$after;
-        }
-
+        $cleanName = preg_replace('/!(десерт|первое|второе|напиток|салат|суп|перекус)/iu', ' ', $name) ?? $name;
         $cleanName = preg_replace('/\s+/u', ' ', $cleanName) ?? $cleanName;
 
         return trim($cleanName);

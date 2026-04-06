@@ -63,12 +63,6 @@ class UpsertDishRequest extends FormRequest
                 $nutrition['fats'],
                 $nutrition['carbohydrates']
             );
-            $sum = $nutrition['proteins'] + $nutrition['fats'] + $nutrition['carbohydrates'];
-
-            if ($sum > 100) {
-                $validator->errors()->add('proteins', 'Сумма белков, жиров и углеводов не может превышать 100.');
-            }
-
             if ($nutrition['calories'] < $minimumCalories) {
                 $validator->errors()->add('calories', 'Калорийность не может быть меньше расчётной по БЖУ.');
             }
