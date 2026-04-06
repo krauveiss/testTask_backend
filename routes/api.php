@@ -1,8 +1,13 @@
 <?php
 
 use App\Http\Controllers\Api\DishController;
+use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\ProductController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/media/{disk}/{path}', [MediaController::class, 'show'])
+    ->where('path', '.*')
+    ->name('media.show');
 
 Route::prefix('products')->group(function (): void {
     Route::get('/', [ProductController::class, 'index']);

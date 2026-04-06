@@ -58,10 +58,19 @@ class UpsertDishRequest extends FormRequest
             }
 
             $nutrition = $this->finalNutrition();
+            $minimumCalories = $this->minimumCalories(
+                $nutrition['proteins'],
+                $nutrition['fats'],
+                $nutrition['carbohydrates']
+            );
             $sum = $nutrition['proteins'] + $nutrition['fats'] + $nutrition['carbohydrates'];
 
-            if ($sum > (float) $this->input('portion_size')) {
-                $validator->errors()->add('proteins', 'Сумма белков, жиров и углеводов в порции не может превышать размер порции.');
+            if ($sum > 100) {
+                $validator->errors()->add('proteins', 'Сумма белков, жиров и углеводов не может превышать 100.');
+            }
+
+            if ($nutrition['calories'] < $minimumCalories) {
+                $validator->errors()->add('calories', 'Калорийность не может быть меньше расчётной по БЖУ.');
             }
         });
     }
@@ -120,5 +129,10 @@ class UpsertDishRequest extends FormRequest
             'gluten_free' => $availableFlags['gluten_free'] && $this->boolean('flags.gluten_free'),
             'sugar_free' => $availableFlags['sugar_free'] && $this->boolean('flags.sugar_free'),
         ];
+    }
+
+    private function minimumCalories(float $proteins, float $fats, float $carbohydrates): float
+    {
+        return round(($proteins * 4) + ($fats * 9) + ($carbohydrates * 4), 2);
     }
 }

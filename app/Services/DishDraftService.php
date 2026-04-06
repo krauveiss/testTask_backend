@@ -74,13 +74,30 @@ class DishDraftService
 
     public function normalizeName(string $name): string
     {
-        $cleanName = preg_replace('/!(десерт|первое|второе|напиток|салат|суп|перекус)/iu', ' ', $name) ?? $name;
+        $firstMacro = $this->resolveFirstMacro($name);
+
+        if ($firstMacro === null) {
+            $cleanName = $name;
+        } else {
+            $position = mb_stripos($name, $firstMacro);
+            $before = mb_substr($name, 0, $position);
+            $after = mb_substr($name, $position + mb_strlen($firstMacro));
+            $cleanName = $before.' '.$after;
+        }
+
         $cleanName = preg_replace('/\s+/u', ' ', $cleanName) ?? $cleanName;
 
         return trim($cleanName);
     }
 
     private function resolveMacroCategory(string $name): ?DishCategory
+    {
+        $firstMacro = $this->resolveFirstMacro($name);
+
+        return $firstMacro ? DishCategory::fromMacro($firstMacro) : null;
+    }
+
+    private function resolveFirstMacro(string $name): ?string
     {
         $firstMacro = null;
         $firstPosition = null;
@@ -98,6 +115,6 @@ class DishDraftService
             }
         }
 
-        return $firstMacro ? DishCategory::fromMacro($firstMacro) : null;
+        return $firstMacro;
     }
 }

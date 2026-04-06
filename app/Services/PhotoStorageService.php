@@ -12,7 +12,7 @@ class PhotoStorageService
         return collect($photos)
             ->map(function (mixed $photo) use ($directory) {
                 if ($photo instanceof UploadedFile) {
-                    return Storage::disk(config('filesystems.default'))->putFile($directory, $photo);
+                    return Storage::disk('public')->putFile($directory, $photo);
                 }
 
                 return trim((string) $photo);

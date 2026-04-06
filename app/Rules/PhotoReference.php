@@ -8,6 +8,10 @@ use Illuminate\Http\UploadedFile;
 
 class PhotoReference implements ValidationRule
 {
+    public function __construct(
+        private bool $allowLinks = false
+    ) {}
+
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if ($value instanceof UploadedFile) {
@@ -20,10 +24,12 @@ class PhotoReference implements ValidationRule
             return;
         }
 
-        if (is_string($value) && trim($value) !== '') {
+        if ($this->allowLinks && is_string($value) && trim($value) !== '') {
             return;
         }
 
-        $fail('Каждая фотография должна быть изображением или строковой ссылкой.');
+        $fail($this->allowLinks
+            ? 'Каждая фотография должна быть изображением или строковой ссылкой.'
+            : 'Каждая фотография должна быть изображением.');
     }
 }

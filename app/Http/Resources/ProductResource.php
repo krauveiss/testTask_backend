@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Services\PhotoUrlService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,7 +13,7 @@ class ProductResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'photos' => $this->photos ?? [],
+            'photos' => app(PhotoUrlService::class)->resolve($this->photos ?? []),
             'calories' => $this->calories,
             'proteins' => $this->proteins,
             'fats' => $this->fats,

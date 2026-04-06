@@ -21,7 +21,7 @@ class UpsertProductRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'min:2'],
             'photos' => ['nullable', 'array', 'max:5'],
-            'photos.*' => [new PhotoReference],
+            'photos.*' => [new PhotoReference(true)],
             'calories' => ['required', 'numeric', 'min:0'],
             'proteins' => ['required', 'numeric', 'min:0', 'max:100'],
             'fats' => ['required', 'numeric', 'min:0', 'max:100'],
@@ -43,10 +43,20 @@ class UpsertProductRequest extends FormRequest
                 return;
             }
 
+            $calories = round((float) $this->input('calories'), 2);
+            $minimumCalories = $this->minimumCalories(
+                (float) $this->input('proteins'),
+                (float) $this->input('fats'),
+                (float) $this->input('carbohydrates')
+            );
             $sum = (float) $this->input('proteins') + (float) $this->input('fats') + (float) $this->input('carbohydrates');
 
             if ($sum > 100) {
                 $validator->errors()->add('proteins', 'Сумма белков, жиров и углеводов на 100 грамм не может превышать 100.');
+            }
+
+            if ($calories < $minimumCalories) {
+                $validator->errors()->add('calories', 'Калорийность не может быть меньше расчётной по БЖУ.');
             }
         });
     }
@@ -63,5 +73,10 @@ class UpsertProductRequest extends FormRequest
             'gluten_free' => $this->boolean('flags.gluten_free'),
             'sugar_free' => $this->boolean('flags.sugar_free'),
         ];
+    }
+
+    private function minimumCalories(float $proteins, float $fats, float $carbohydrates): float
+    {
+        return round(($proteins * 4) + ($fats * 9) + ($carbohydrates * 4), 2);
     }
 }
